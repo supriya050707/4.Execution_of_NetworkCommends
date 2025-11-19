@@ -31,48 +31,27 @@ client
 
 ```
 import socket
-s = socket.socket()
-host = socket.gethostname()
-port = 60000
-s.connect((host, port))
-s.send("Hello server!".encode())
-with open('mytext.txt', 'wb') as f:
- while True:
-    print('receiving data...')
-    data = s.recv(1024)
-    print('data=%s', (data))
-    if not data:
-        break
-    f.write(data)
-f.close()
-print('Successfully get the file')
-s.close()
-print('connection closed')
+from pythonping import ping
+s=socket.socket()
+s.bind(('localhost',8000))
+s.listen(5)
+c,addr=s.accept()
+while True:
+    hostname=c.recv(1024).decode()
+    try:
+        c.send(str(ping(hostname, verbose=False)).encode())
+    except KeyError:
+        c.send("Not Found".encode())
 ```
 server
-
 ```
 import socket
-port = 60000
-s = socket.socket()
-host = socket.gethostname()
-s.bind((host, port))
-s.listen(5)
+s=socket.socket()
+s.connect(('localhost',8000))
 while True:
-    conn, addr = s.accept()
-    data = conn.recv(1024)
-    print('Server received', repr(data))
-    filename='mytext.txt'
-    f = open(filename,'rb')
-    l = f.read(1024)
-    while (l):
-        conn.send(l)
-        print('Sent ',repr(l))
-        l = f.read(1024)
-    f.close()
-    print('Done sending')
-    conn.send('Thank you for connecting'.encode())
-    conn.close()
+    ip=input("Enter the website you want to ping ")
+    s.send(ip.encode())
+    print(s.recv(1024).decode())
 ```
 ## Output
 
